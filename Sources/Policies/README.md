@@ -4,6 +4,60 @@ In an enterprise environment, it's crucial that different groups can have differ
 
 ![image](https://user-images.githubusercontent.com/102996177/213920242-7ff8e2b4-d926-4407-b860-1e5922e29c3e.png)
 
+## Group Policy (GPO)
+
+### Deploy WAU without installing ADMX/ADML files
+
+The ADMX/ADML files are only needed to display WAU settings in the Group Policy
+editor. You can deploy WAU and configure its supported policies without adding
+template files to the domain.
+
+#### Install the MSI
+
+1. Copy `WAU.msi` to a stable network share accessible to computer accounts,
+   for example `\\<domain>\SYSVOL\<domain>\scripts\WAU\WAU.msi`. Grant the
+   computers being targeted read access to the share and its files.
+2. In Group Policy Management, create or edit a GPO linked to the OU containing
+   the target **computer** accounts.
+3. Go to **Computer Configuration > Policies > Software Settings > Software
+   installation**, choose **New > Package**, select the MSI using its UNC path,
+   and assign it.
+4. Restart a target computer to install WAU.
+
+This installs WAU with its default MSI settings. To set MSI properties such as
+`USERCONTEXT` during installation, use a computer startup script that runs
+`msiexec.exe /i "\\<server>\<share>\WAU.msi" /qn /norestart PROPERTY=value`
+instead. Ensure the script handles already-installed versions before running
+the installer again.
+
+#### Configure WAU with Registry Preferences
+
+To apply WAU settings without the administrative template, open the GPO's
+**Computer Configuration > Preferences > Windows Settings > Registry** and
+create registry items under:
+
+`HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Romanitho\Winget-AutoUpdate`
+
+Use the value names and data types shown in the WAU ADMX file. For example:
+
+| Value name | Type | Example data |
+|---|---|---|
+| `WAU_UpdatesInterval` | `REG_SZ` | `Weekly` |
+| `WAU_UpdatesAtTime` | `REG_SZ` | `06:00:00` |
+| `WAU_UpdatesAtLogon` | `REG_DWORD` | `1` |
+| `WAU_NotificationLevel` | `REG_SZ` | `Full` (`SuccessOnly`, `ErrorsOnly`, or `None` are also supported) |
+| `WAU_UseWhiteList` | `REG_DWORD` | `1` |
+
+For an application allowlist, add string values under
+`...\Winget-AutoUpdate\WhiteList`; each value's data is a WinGet package ID.
+For a blocklist, use `...\Winget-AutoUpdate\BlackList`. For example, create a
+`REG_SZ` value named `App1` with data `Microsoft.VisualStudioCode`.
+
+WAU reads these registry policies when running. The `Winget-AutoUpdate-Policies`
+scheduled task applies schedule changes daily at 6:00 AM. GPO management is
+enabled automatically when policies are present; the old
+`WAU_ActivateGPOManagement` value is deprecated.
+
 ## Administrative Template
 
 ### To an Individual Computer
