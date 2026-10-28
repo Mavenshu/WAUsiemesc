@@ -71,10 +71,6 @@
         <Property Id="MODSPATH_VALUE">
             <RegistrySearch Id="SearchModsPath" Type="raw" Root="HKLM" Key="SOFTWARE\[Manufacturer]\[ProductName]" Name="WAU_ModsPath"  />
         </Property>
-        <Property Id="AZUREBLOBURL" Secure="yes" />
-        <Property Id="AZUREBLOBURL_VALUE">
-            <RegistrySearch Id="SearchAzureBlobSASURL" Type="raw" Root="HKLM" Key="SOFTWARE\[Manufacturer]\[ProductName]" Name="WAU_AzureBlobSASURL"  />
-        </Property>
         <Property Id="DONOTRUNONMETERED" Secure="yes" />
         <Property Id="DONOTRUNONMETERED_VALUE" Value="#1">
             <RegistrySearch Id="SearchDoNotRunOnMetered" Type="raw" Root="HKLM" Key="SOFTWARE\[Manufacturer]\[ProductName]" Name="WAU_DoNotRunOnMetered"  />
@@ -259,7 +255,6 @@
         <SetProperty Action="SetUSEWHITELIST_1" Id="USEWHITELIST" After="SetUSEWHITELIST_0" Value="1" Condition="WHITELIST_PATH OR USEWHITELIST = &quot;#1&quot;" />
         <SetProperty Id="LISTPATH_VALUE" After="AppSearch" Value="[LISTPATH]" Condition="LISTPATH" />
         <SetProperty Id="MODSPATH_VALUE" After="AppSearch" Value="[MODSPATH]" Condition="MODSPATH" />
-        <SetProperty Id="AZUREBLOBURL_VALUE" After="AppSearch" Value="[AZUREBLOBURL]" Condition="AZUREBLOBURL" />
         <SetProperty Id="DONOTRUNONMETERED_VALUE" After="AppSearch" Value="#[DONOTRUNONMETERED]" Condition="DONOTRUNONMETERED" />
         <SetProperty Id="UPDATESATTIME_VALUE" After="AppSearch" Value="[UPDATESATTIME]" Condition="UPDATESATTIME" />
         <SetProperty Id="UPDATESATTIMEDELAY_VALUE" After="AppSearch" Value="[UPDATESATTIMEDELAY]" Condition="UPDATESATTIMEDELAY" />
@@ -309,7 +304,6 @@
 						<RegistryValue Name="WAU_UseWhiteList" Type="integer" Value="[USEWHITELIST]" />
 						<RegistryValue Name="WAU_ListPath" Type="string" Value="[LISTPATH_VALUE]" />
 						<RegistryValue Name="WAU_ModsPath" Type="string" Value="[MODSPATH_VALUE]" />
-						<RegistryValue Name="WAU_AzureBlobSASURL" Type="string" Value="[AZUREBLOBURL_VALUE]" />
 						<RegistryValue Name="WAU_DoNotRunOnMetered" Type="string" Value="[DONOTRUNONMETERED_VALUE]" />
 						<RegistryValue Name="WAU_UpdatesAtTime" Type="string" Value="[UPDATESATTIME_VALUE]" />
 						<RegistryValue Name="WAU_UpdatesTimeDelay" Type="string" Value="[UPDATESATTIMEDELAY_VALUE]" />

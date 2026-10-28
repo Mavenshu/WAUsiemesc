@@ -52,16 +52,12 @@ If this policy is disabled or not configured, the default is No.</string>
 If "Application GPO Blacklist/Whitelist" is set, this policy setting is ignored.
 
 If this policy is disabled or not configured, the default ListPath is used (WAU InstallLocation).</string>
-      <string id="ModsPath_Name">Get Mods from external Path (URL/UNC/Local/AzureBlob)</string>
-      <string id="ModsPath_Explain">If this policy is enabled, you can set a (URL/UNC/Local/AzureBlob) Path to external mods other than the default.
+      <string id="ModsPath_Name">Get Mods from a local folder</string>
+      <string id="ModsPath_Explain">If this policy is enabled, you can set an absolute path on a local fixed drive to a folder containing mods.
 
 If this policy is disabled or not configured, the default ModsPath is used (WAU InstallLocation).
 
-Note: When set to 'AzureBlob', ensure you also configure 'Set Azure Blob URL with SAS token'.</string>
-      <string id="BlobURL_Name">Set Azure Blob URL with SAS Token</string>
-      <string id="BlobURL_Explain">If this policy is enabled, you can set an Azure Storage Blob URL with SAS token for use with the 'Mods' feature. The URL must include the SAS token and have 'read' and 'list' permissions.
-
-If this policy is disabled or not configured, the value is blank and Azure Blob storage will NOT work.</string>
+Network paths, mapped drives, and URLs are not supported.</string>
       <string id="NotificationLevel_Name">Notification Level</string>
       <string id="NotificationLevel_Explain">If this policy is enabled, you can configure the Notification Level:
     1. Full (Default)
@@ -168,12 +164,7 @@ If this policy is disabled or not configured, the default no delay.</string>
       </presentation>
       <presentation id="ModsPath">
         <textBox refId="ModsPath">
-          <label>(URL/UNC/Local/AzureBlob) Path:</label>
-        </textBox>
-      </presentation>
-      <presentation id="BlobURL">
-        <textBox refId="BlobURL">
-          <label>Azure Storage URL with SAS token:</label>
+          <label>Local fixed-drive folder path:</label>
         </textBox>
       </presentation>
       <presentation id="NotificationLevel">

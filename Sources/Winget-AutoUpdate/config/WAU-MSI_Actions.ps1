@@ -68,8 +68,11 @@ function Install-WingetAutoUpdate {
 
         # Get WAU config from registry
         $WAUconfig = Get-ItemProperty "HKLM:\SOFTWARE\Romanitho\Winget-AutoUpdate"
-        Write-Output "-> WAU Config:"
-        Write-Output $WAUconfig
+
+        if ($WAUconfig.PSObject.Properties.Name -contains "WAU_AzureBlobSASURL") {
+            Remove-ItemProperty -Path "HKLM:\SOFTWARE\Romanitho\Winget-AutoUpdate" -Name "WAU_AzureBlobSASURL" -ErrorAction Stop
+            Write-Output "-> Removed the retired Azure Blob mods-source setting"
+        }
 
         # Create scheduled tasks
         Write-Host "-> Installing WAU scheduled tasks"

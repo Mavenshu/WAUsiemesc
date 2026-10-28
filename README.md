@@ -57,6 +57,9 @@ You can find logs in install location, in logs folder for priviledged executions
 If **Intune Management Extension** is installed, a **SymLink** (WAU-updates.log) is created under **C:\ProgramData\Microsoft\IntuneManagementExtension\Logs**<br>
 If you are deploying winget Apps with [Winget-Install](https://github.com/Romanitho/Winget-AutoUpdate/blob/main/Sources/Winget-AutoUpdate/Winget-Install.ps1) a **SymLink** (WAU-install.log & WAU-user_%username%.log) is also created under **C:\ProgramData\Microsoft\IntuneManagementExtension\Logs**
 
+### Antivirus, EDR, and SIEM alerts
+WAU's scheduled PowerShell execution and application downloads may generate alerts. See the [security guidance](SECURITY.md#antivirus-edr-and-siem-alerts) for release verification and safe false-positive handling.
+
 ### "Unknown" App version
 As explained in this [post](https://github.com/microsoft/winget-cli/issues/1255), Winget cannot detect the current version of some installed apps. We decided to skip managing these apps with WAU to avoid retries each time WAU runs:
 
@@ -115,26 +118,9 @@ If a blacklist or whitelist is configured via Group Policy (GPO), WAU will autom
 
 
 ### MODSPATH
-Get Mods from external Path (**URL/UNC/Local/AzureBlob**) - download/copy to `mods` in Winget-AutoUpdate installation location if external mods are newer.<br>
-For **URL**: This requires a site directory with **Directory Listing Enabled** and no index page overriding the listing of files (or an index page with href listing of all the **Mods** to be downloaded):
-```html
-<ul>
-<li><a  href="Adobe.Acrobat.Reader.32-bit-installed.ps1">Adobe.Acrobat.Reader.32-bit-installed.ps1</a></li>
-<li><a  href="Adobe.Acrobat.Reader.64-bit-override.txt">Adobe.Acrobat.Reader.64-bit-override.txt</a></li>
-<li><a  href="Notepad++.Notepad++-installed.ps1">Notepad++.Notepad++-installed.ps1</a></li>
-<li><a  href="Notepad++.Notepad++-uninstalled.ps1">Notepad++.Notepad++-uninstalled.ps1</a></li>
-</ul>
-```
-Validated on **IIS/Apache**.
+Mods can be synchronized from an absolute folder path on a local fixed drive. Newer `.ps1` and `.txt` files and `.exe` files under `bins` are copied to WAU's `mods` folder; supported files removed from the source are also removed locally.
 
->**Nota bene IIS** :
->- The extension **.ps1** must be added as **MIME Types** (text/powershell-script) otherwise it's displayed in the listing but can't be opened
->- Files with special characters in the filename can't be opened by default from an IIS server - config must be administrated: **Enable Allow double escaping** in '**Request Filtering**'
-
-For **AzureBlob**: This requires the parameter **-AzureBlobURL** to be set with an appropriate Azure Blob Storage URL including the SAS token. See **-AzureBlobURL** for more information.
-
-### AZUREBLOBURL
-Used in conjunction with the **-ModsPath** parameter to provide the Azure Storage Blob URL with SAS token. The SAS token must, at a minimum, have 'Read' and 'List' permissions. It is recommended to set the permisions at the container level and rotate the SAS token on a regular basis. Ensure the container reflects the same structure as found under the initial `mods` folder.
+URLs, Azure Blob Storage, UNC paths, mapped drives, and other network sources are not supported. If an older installation has one of these sources configured, WAU will reject it and log the reason. Copy the required mod files to a local fixed-drive folder and update the `MODSPATH` installer property or Group Policy setting. Remove any retired Azure Blob SAS-token policy value and rotate its token.
 
 ### USERCONTEXT
 Default value 0. Set `USERCONTEXT=1` to install WAU with system and **user** context executions.<br>
