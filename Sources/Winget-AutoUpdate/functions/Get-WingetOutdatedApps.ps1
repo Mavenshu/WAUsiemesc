@@ -39,7 +39,7 @@ function Get-WingetOutdatedApps {
 
     # Get upgrade list from WinGet
     try {
-        $upgradeResult = & $Winget upgrade --source $src | Where-Object { $_ -notlike "   *" } | Out-String
+        $upgradeResult = & $Winget upgrade --source $src --accept-source-agreements | Where-Object { $_ -notlike "   *" } | Out-String
     }
     catch {
         Write-ToLog "Error while receiving winget upgrade list: $_" "Red"

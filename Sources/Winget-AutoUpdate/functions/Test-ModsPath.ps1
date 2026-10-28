@@ -44,6 +44,21 @@ function Test-ModsPath ($ModsPath, $WingetUpdatePath) {
         return $ModsUpdated, $DeletedMods
     }
 
+    $PathToCheck = $DriveRoot
+    $PathSegments = $SourceFullPath.Substring($DriveRoot.Length).Split(
+        [char[]]@("\"),
+        [System.StringSplitOptions]::RemoveEmptyEntries
+    )
+    foreach ($Segment in $PathSegments) {
+        $PathToCheck = Join-Path $PathToCheck $Segment
+        $PathItem = Get-Item -LiteralPath $PathToCheck -Force -ErrorAction Stop
+        if ($PathItem.Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
+            Write-ToLog "Mods source rejected: reparse points are not supported in the source path." "Red"
+            $Script:ReachNoPath = $True
+            return $ModsUpdated, $DeletedMods
+        }
+    }
+
     if (-not (Test-Path -LiteralPath $SourceFullPath -PathType Container)) {
         Write-ToLog "Mods source folder is unavailable." "Red"
         $Script:ReachNoPath = $True
@@ -67,8 +82,17 @@ function Test-ModsPath ($ModsPath, $WingetUpdatePath) {
         New-Item -ItemType Directory -Path $LocalMods -Force -ErrorAction Stop | Out-Null
     }
 
+    $SourceEntries = @(
+        Get-ChildItem -LiteralPath $SourceFullPath -Force -Recurse -ErrorAction Stop
+    )
+    if ($SourceEntries | Where-Object { $_.Attributes -band [System.IO.FileAttributes]::ReparsePoint }) {
+        Write-ToLog "Mods source rejected: reparse points are not supported inside the source folder." "Red"
+        $Script:ReachNoPath = $True
+        return $ModsUpdated, $DeletedMods
+    }
+
     $ExternalFiles = @(
-        Get-ChildItem -LiteralPath $SourceFullPath -File -Recurse -ErrorAction Stop |
+        $SourceEntries | Where-Object { -not $_.PSIsContainer } |
             Where-Object {
                 $relativePath = $_.FullName.Substring($SourceFullPath.Length).TrimStart("\")
                 $_.Extension -in @(".ps1", ".txt") -or
@@ -76,19 +100,11 @@ function Test-ModsPath ($ModsPath, $WingetUpdatePath) {
             }
     )
 
-    if ($ExternalFiles.Count -eq 0) {
-        Write-ToLog "Mods source contains no supported mod files or bins." "Yellow"
-        $Script:ReachNoPath = $True
-        return $ModsUpdated, $DeletedMods
-    }
-
     $ExternalModFiles = @($ExternalFiles | Where-Object { $_.Extension -in @(".ps1", ".txt") })
-    $ExternalBinFiles = @(
-        $ExternalFiles | Where-Object {
-            $relativePath = $_.FullName.Substring($SourceFullPath.Length).TrimStart("\")
-            $relativePath -match "^bins\\.+\.exe$"
-        }
-    )
+    $HasExternalBinDirectory = Test-Path -LiteralPath (Join-Path $SourceFullPath "bins") -PathType Container
+    if ($ExternalFiles.Count -eq 0) {
+        Write-ToLog "Mods source contains no supported mod files or binaries; stale mod scripts will be removed." "Yellow"
+    }
 
     $ExternalRelativePaths = @{}
     foreach ($File in $ExternalFiles) {
@@ -109,8 +125,8 @@ function Test-ModsPath ($ModsPath, $WingetUpdatePath) {
         $RelativePath = $File.FullName.Substring($LocalMods.Length).TrimStart("\")
         $IsModFile = $File.Extension -in @(".ps1", ".txt")
         $IsBinFile = $RelativePath -match "^bins\\.+\.exe$"
-        $ShouldRemove = ($IsModFile -and $ExternalModFiles.Count -gt 0) -or
-            ($IsBinFile -and $ExternalBinFiles.Count -gt 0)
+        $ShouldRemove = ($IsModFile -and ($ExternalModFiles.Count -gt 0 -or $ExternalFiles.Count -eq 0)) -or
+            ($IsBinFile -and $HasExternalBinDirectory)
 
         if ($ShouldRemove -and -not $ExternalRelativePaths.ContainsKey($RelativePath)) {
             Remove-Item -LiteralPath $File.FullName -Force -ErrorAction Stop

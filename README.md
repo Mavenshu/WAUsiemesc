@@ -120,6 +120,8 @@ If a blacklist or whitelist is configured via Group Policy (GPO), WAU will autom
 ### MODSPATH
 Mods can be synchronized from an absolute folder path on a local fixed drive. Newer `.ps1` and `.txt` files and `.exe` files under `bins` are copied to WAU's `mods` folder; supported files removed from the source are also removed locally.
 
+WAU runs mods in its update context, which may be `SYSTEM`. Keep the source folder writable only by trusted administrators. Reparse points in the source path or its contents are rejected.
+
 URLs, Azure Blob Storage, UNC paths, mapped drives, and other network sources are not supported. If an older installation has one of these sources configured, WAU will reject it and log the reason. Copy the required mod files to a local fixed-drive folder and update the `MODSPATH` installer property or Group Policy setting. Remove any retired Azure Blob SAS-token policy value and rotate its token.
 
 ### USERCONTEXT
