@@ -2,7 +2,7 @@
 
 ![image](https://github.com/Romanitho/Winget-AutoUpdate/assets/96626929/0e738c7a-cbe4-4010-94f6-1e9165bc0d49)
 
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Romanitho/Winget-AutoUpdate?label=Latest%20Stable%20Release&style=for-the-badge)](https://github.com/Romanitho/Winget-AutoUpdate/releases/latest)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Mavenshu/WAUsiemesc?label=Latest%20Stable%20Release&style=for-the-badge)](https://github.com/Mavenshu/WAUsiemesc/releases/latest)
 
 </h1>
 
@@ -11,7 +11,7 @@ This project uses the Winget tool to daily update apps (with system context) and
 ![image](https://user-images.githubusercontent.com/96626929/150645599-9460def4-0818-4fe9-819c-dd7081ff8447.png)
 
 ## Installation
-Just download latest release [WAU.msi](https://github.com/Romanitho/Winget-AutoUpdate/releases/latest):
+Just download latest release [WAU.msi](https://github.com/Mavenshu/WAUsiemesc/releases/latest):
 
 ![image](https://github.com/user-attachments/assets/e6b090ff-9c40-46e1-a04b-9b7437f3e2e7)
 ![image](https://github.com/user-attachments/assets/2e4af91b-e319-401b-99cd-3c199e21016b)
@@ -301,6 +301,6 @@ Feel free to give us any suggestions or optimizations in code and support us by 
 
 ### WAU - GitHub
 
-[![GitHub release (release name instead of tag name)](https://img.shields.io/github/v/release/Romanitho/Winget-AutoUpdate?display_name=release&include_prereleases&label=Latest%20Release&style=flat-square)](https://github.com/Romanitho/Winget-AutoUpdate/releases/)
+[![GitHub release (release name instead of tag name)](https://img.shields.io/github/v/release/Mavenshu/WAUsiemesc?display_name=release&include_prereleases&label=Latest%20Release&style=flat-square)](https://github.com/Mavenshu/WAUsiemesc/releases/)
 
 </div>

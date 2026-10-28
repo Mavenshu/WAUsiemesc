@@ -17,7 +17,7 @@
 function Update-WAU {
 
     # Setup notification action and button
-    $OnClickAction = "https://github.com/Romanitho/$($GitHub_Repo)/releases"
+    $OnClickAction = "https://github.com/$($GitHub_Owner)/$($GitHub_Repo)/releases"
     $Button1Text = $NotifLocale.local.outputs.output[10].message
 
     # Send "update available" notification
@@ -35,7 +35,7 @@ function Update-WAU {
 
         # Download the MSI package
         $MsiFile = Join-Path $MsiFolder "WAU.msi"
-        Invoke-RestMethod -Uri "https://github.com/Romanitho/Winget-AutoUpdate/releases/download/v$($WAUAvailableVersion)/WAU.msi" -OutFile $MsiFile
+        Invoke-RestMethod -Uri "https://github.com/$($GitHub_Owner)/$($GitHub_Repo)/releases/download/v$($WAUAvailableVersion)/WAU.msi" -OutFile $MsiFile
         if (-not (Test-Path -LiteralPath $MsiFile -PathType Leaf) -or (Get-Item -LiteralPath $MsiFile).Length -eq 0) {
             throw "Downloaded WAU MSI is missing or empty."
         }

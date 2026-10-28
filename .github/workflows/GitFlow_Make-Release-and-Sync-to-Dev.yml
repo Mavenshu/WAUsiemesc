@@ -10,6 +10,9 @@
 name: GitFlow | Make Release and resync to develop
 
 on:
+  push:
+    tags:
+      - "v*"
   # Trigger when PRs to main are closed (merged or not)
   pull_request:
     types: [closed]
@@ -23,8 +26,13 @@ permissions:
 jobs:
   build:
     name: Create Release
-    # Run only when PR is merged (not just closed) and source branch is release/* or hotfix/*
-    if: github.event.pull_request.merged == true && (startsWith(github.event.pull_request.head.ref, 'release/') || startsWith(github.event.pull_request.head.ref, 'hotfix/'))
+    # Build stable releases from the existing GitFlow PR path or a pushed v* tag.
+    if: >-
+      (github.event_name == 'pull_request'
+      && github.event.pull_request.merged == true
+      && (startsWith(github.event.pull_request.head.ref, 'release/')
+      || startsWith(github.event.pull_request.head.ref, 'hotfix/')))
+      || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
     runs-on: windows-latest
     outputs:
       next_semver: ${{ steps.release_version.outputs.NextSemVer }}
@@ -34,7 +42,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          token: ${{ secrets.GH_PAT_SYNC }}
+          token: ${{ github.token }}
           lfs: "true"
           fetch-depth: 0
 
@@ -42,10 +50,21 @@ jobs:
       - name: Get final Release Version
         id: release_version
         shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
+          if [[ "$EVENT_NAME" == "push" ]]; then
+            VERSION="${REF_NAME#v}"
+            if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "Invalid stable release tag: $REF_NAME"
+              exit 1
+            fi
+            echo "Version extracted from tag: $VERSION"
           # Extract version from branch name if it's a release branch
-          if [[ "${{ github.event.pull_request.head.ref }}" =~ ^release/ ]]; then
-            VERSION=$(echo "${{ github.event.pull_request.head.ref }}" | sed -E 's/^release\///')
+          elif [[ "$PR_HEAD_REF" =~ ^release/ ]]; then
+            VERSION=$(echo "$PR_HEAD_REF" | sed -E 's/^release\///')
             echo "Version extracted from release branch: $VERSION"
           else
             # Fetch the latest stable version for hotfix
@@ -133,8 +152,8 @@ jobs:
             ## Files
             |Files|Hash (SHA256)|Downloads|
             |---|---|---|
-            |[WAU.msi](https://github.com/Romanitho/Winget-AutoUpdate/releases/download/v${{ steps.release_version.outputs.NextSemVer }}/WAU.msi) (x64)|`${{ steps.build_project.outputs.msi_sha }}`|<picture>![WAU.msi](https://img.shields.io/github/downloads/Romanitho/Winget-AutoUpdate/v${{ steps.release_version.outputs.NextSemVer }}/WAU.msi?style=flat-square&label=&color=blue)</picture>|
-            |[${{ steps.build_project.outputs.admx_zip_name }}](https://github.com/Romanitho/Winget-AutoUpdate/releases/download/v${{ steps.release_version.outputs.NextSemVer }}/${{ steps.build_project.outputs.admx_zip_name }})|`${{ steps.build_project.outputs.admx_sha }}`|<picture>![${{ steps.build_project.outputs.admx_zip_name }}](https://img.shields.io/github/downloads/Romanitho/Winget-AutoUpdate/v${{ steps.release_version.outputs.NextSemVer }}/${{ steps.build_project.outputs.admx_zip_name }}?style=flat-square&label=&color=blue)</picture>|
+            |[WAU.msi](https://github.com/${{ github.repository }}/releases/download/v${{ steps.release_version.outputs.NextSemVer }}/WAU.msi) (x64)|`${{ steps.build_project.outputs.msi_sha }}`|<picture>![WAU.msi](https://img.shields.io/github/downloads/${{ github.repository }}/v${{ steps.release_version.outputs.NextSemVer }}/WAU.msi?style=flat-square&label=&color=blue)</picture>|
+            |[${{ steps.build_project.outputs.admx_zip_name }}](https://github.com/${{ github.repository }}/releases/download/v${{ steps.release_version.outputs.NextSemVer }}/${{ steps.build_project.outputs.admx_zip_name }})|`${{ steps.build_project.outputs.admx_sha }}`|<picture>![${{ steps.build_project.outputs.admx_zip_name }}](https://img.shields.io/github/downloads/${{ github.repository }}/v${{ steps.release_version.outputs.NextSemVer }}/${{ steps.build_project.outputs.admx_zip_name }}?style=flat-square&label=&color=blue)</picture>|
 
             ___
 

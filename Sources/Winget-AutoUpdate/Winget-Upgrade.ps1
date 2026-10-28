@@ -12,8 +12,9 @@ $null = & "$env:WINDIR\System32\cmd.exe" /c ""
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $Script:ProgressPreference = [System.Management.Automation.ActionPreference]::SilentlyContinue
 
-# Set GitHub Repo
-[string]$Script:GitHub_Repo = "Winget-AutoUpdate"
+# Set GitHub release repository
+[string]$Script:GitHub_Owner = "Mavenshu"
+[string]$Script:GitHub_Repo = "WAUsiemesc"
 
 # Log initialization
 [string]$LogFile = [System.IO.Path]::Combine($Script:WorkingDir, 'logs', 'updates.log')
