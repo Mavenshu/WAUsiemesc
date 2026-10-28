@@ -39,6 +39,19 @@ Function Update-App ($app, $src = "winget") {
         return @{ Params = $params + "-h"; Log = $Command }
     }
 
+    function Get-AppInstallationStatus {
+        try {
+            return Confirm-Installation $app.Id $app.AvailableVersion $src
+        }
+        catch {
+            Write-ToLog "$($app.Name) installation status could not be verified: $_" "Red"
+            Start-NotifTask -Title ($NotifLocale.local.outputs.output[4].title -f $app.Name) `
+                -Message $NotifLocale.local.outputs.output[4].message `
+                -MessageType "error" -Balise $app.Name
+            return $null
+        }
+    }
+
     # Load mods
     $ModsPreInstall, $ModsOverride, $ModsCustom, $ModsArguments, $ModsUpgrade, $ModsInstall, $ModsInstalled, $ModsNotInstalled = Test-Mods $app.Id
 
@@ -89,7 +102,10 @@ Function Update-App ($app, $src = "winget") {
         & $ModsUpgrade
     }
 
-    $ConfirmInstall = Confirm-Installation $app.Id $app.AvailableVersion $src
+    $ConfirmInstall = Get-AppInstallationStatus
+    if ($null -eq $ConfirmInstall) {
+        return
+    }
 
     # Fallback to install if upgrade failed
     if (-not $ConfirmInstall) {
@@ -107,7 +123,10 @@ Function Update-App ($app, $src = "winget") {
                 & $ModsInstall
             }
 
-            $ConfirmInstall = Confirm-Installation $app.Id $app.AvailableVersion $src
+            $ConfirmInstall = Get-AppInstallationStatus
+            if ($null -eq $ConfirmInstall) {
+                return
+            }
         }
     }
 
